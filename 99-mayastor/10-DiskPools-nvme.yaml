@@ -1,0 +1,38 @@
+apiVersion: openebs.io/v1beta2
+kind: DiskPool
+metadata:
+  name: beehive1-nvme-ssd-pool
+  namespace: openebs
+spec:
+  disks:
+  - /dev/disk/by-id/nvme-CT2000P3PSSD8_2424E8B829DB
+  node: beehive1
+  topology:
+    labelled:
+      pool: nvme-ssd
+---
+apiVersion: openebs.io/v1beta2
+kind: DiskPool
+metadata:
+  name: beehive2-nvme-ssd-pool
+  namespace: openebs
+spec:
+  disks:
+  - /dev/disk/by-id/nvme-CT2000P3PSSD8_2424E8B83226
+  node: beehive2
+  topology:
+    labelled:
+      pool: nvme-ssd
+---
+apiVersion: openebs.io/v1beta2
+kind: DiskPool
+metadata:
+  name: beehive3-nvme-ssd-pool
+  namespace: openebs
+spec:
+  disks:
+  - /dev/disk/by-id/nvme-CT2000P3PSSD8_2424E8B8298B
+  node: beehive3
+  topology:
+    labelled:
+      pool: nvme-ssd

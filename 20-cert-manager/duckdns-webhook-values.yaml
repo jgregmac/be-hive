@@ -1,0 +1,8 @@
+clusterIssuer:
+  email: "jgreg@outlook.com"
+  production:
+    create: true
+  staging:
+    create: true
+token:
+  value: "REDACTED_REDACTED_REDACTED"

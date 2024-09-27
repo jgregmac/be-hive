@@ -1,0 +1,11 @@
+apiVersion: openebs.io/v1alpha1
+kind: DiskPool
+metadata:
+  finalizers:
+  - openebs.io/diskpool-protection
+  name: microk8s-beehive1-pool
+  namespace: mayastor
+spec:
+  disks:
+  - /data/microk8s.img
+  node: beehive1

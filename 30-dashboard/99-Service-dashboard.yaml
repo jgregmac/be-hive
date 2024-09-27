@@ -1,0 +1,33 @@
+# Overrides dashboard service deployed by microk8s.  This may get stomped during microk8s updates.
+# If we can get it to work, use of an Ingress likely would be better.
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    metallb.universe.tf/loadBalancerIPs: 192.168.3.35
+  labels:
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard
+  namespace: kube-system
+spec:
+  allocateLoadBalancerNodePorts: true
+  # Generated randomly.  Should not be part of a generic manifest:
+  clusterIP: 10.152.183.245
+  # Also remove from generic manifest:
+  clusterIPs:
+  - 10.152.183.245
+  externalTrafficPolicy: Cluster
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  # Node port generated randomly, also should not be in a generic manifest:
+  - nodePort: 30970
+    port: 443
+    protocol: TCP
+    targetPort: 8443
+  selector:
+    k8s-app: kubernetes-dashboard
+  sessionAffinity: None
+  type: LoadBalancer

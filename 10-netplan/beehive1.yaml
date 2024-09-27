@@ -1,0 +1,38 @@
+network:
+  ethernets:
+    eno1:
+      addresses:
+      - 192.168.3.1/23
+      nameservers:
+        addresses:
+        - 9.9.9.9
+        search: []
+      routes:
+      - to: default
+        # to: 0.0.0.0/0
+        via: 192.168.2.1
+        # metric: 50
+    enp5s0:
+      addresses:
+      - 192.168.5.1/23
+      nameservers:
+        addresses: []
+        search: []
+  version: 2
+  wifis:
+    wlp3s0:
+      # activation-mode: off
+      access-points:
+        BananaShack-24:
+          password: REDACTED_REDACTED_REDACTED
+      dhcp4: false
+      # addresses:
+      # - 192.168.2.80/23
+      # nameservers:
+      #   addresses:
+      #   - 9.9.9.9
+      #   search: []
+      # routes:
+      # - to: default
+      #   via: 192.16.2.1
+      #   metric: 100

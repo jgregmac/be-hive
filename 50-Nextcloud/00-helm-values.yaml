@@ -1,0 +1,80 @@
+# Use nginx instead of apache. works around hugepage problem???
+image.flavor: fpm
+nginx.enabled: true
+
+# Database configuration:
+internalDatabase.enabled: false
+externalDatabase:
+  enabled: true
+  host: my-postgresql.nextcloud.svc.cluster.local
+  type: postgresql
+  password: "FIRST_PASSWORD"
+postgresql:
+  enabled: true
+  global:
+    defaultStorageClass: mayastor-2x-replica
+    postgresql:
+      auth.password: "FIRST_PASSWORD"
+      primary.persistence.enabled: true
+
+# Storage:
+persistence:
+  enabled: true
+  storageClass: mayastor-2x-replica
+  size: 512Gi
+
+# Nextcloud configuration:
+nextcloud:
+  # extraVolumes:
+  #   - name: hugepages
+  #     emptyDir:
+  #       medium: HugePages-2Mi
+  # extraVolumeMounts:
+  #   - name: hugepages
+  #     mountPath: /dev/hugepages
+  password: "SECOND_PASSWORD"
+
+# resources:
+#   requests:
+#     hugepages-2Mi: 500Mi
+#     # note that Kubernetes currently requires cpu or memory requests and limits before hugepages are allowed.
+#     memory: 500Mi
+#   limits:
+#     # limit and request must be the same for hugepages. They are a fixed resource.
+#     hugepages-2Mi: 500Mi
+#     # note that Kubernetes currently requires cpu or memory requests and limits before hugepages are allowed.
+#     memory: 1Gi
+
+ingress:
+  annotations:
+    cert-manager.io/cluster-issuer: duckdns-letsencrypt-prod
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "X-Forwarded-For"
+    nginx.ingress.kubernetes.io/server-snippet: |-
+      server_tokens off;
+      proxy_hide_header X-Powered-By;
+      rewrite ^/.well-known/webfinger /index.php/.well-known/webfinger last;
+      rewrite ^/.well-known/nodeinfo /index.php/.well-known/nodeinfo last;
+      rewrite ^/.well-known/host-meta /public.php?service=host-meta last;
+      rewrite ^/.well-known/host-meta.json /public.php?service=host-meta-json;
+      location = /.well-known/carddav {
+        return 301 $scheme://$host/remote.php/dav;
+      }
+      location = /.well-known/caldav {
+        return 301 $scheme://$host/remote.php/dav;
+      }
+      location = /robots.txt {
+        allow all;
+        log_not_found off;
+        access_log off;
+      }
+      location ~ ^/(?:build|tests|config|lib|3rdparty|templates|data)/ {
+        deny all;
+      }
+      location ~ ^/(?:autotest|occ|issue|indie|db_|console) {
+        deny all;
+      }
+  tls:
+  - hosts:
+    - nextcloud.mackinnon.duckdns.org
+    secretName: nextcloud-letsencrypt-tls
