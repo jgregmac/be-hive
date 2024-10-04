@@ -1,3 +1,5 @@
+# Kinda messy doing this.  Maybe you can assign "labels" to the block devices and use
+# /dev/disk/by-label path instead?
 apiVersion: openebs.io/v1beta2
 kind: DiskPool
 metadata:

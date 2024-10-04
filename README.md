@@ -5,6 +5,19 @@ cloud-like services at home.  Because why would you NOT want to take on the burd
 running an entire cloud suite of services WITH hardware maintenance obligations,
 entirely in your spare time?
 
+- [The Be-hive: A Self-Hosting Experiment](#the-be-hive-a-self-hosting-experiment)
+  - [Environment](#environment)
+    - [Hardware](#hardware)
+      - [System Information](#system-information)
+    - [Software](#software)
+    - [Networking](#networking)
+  - [Host Install Process](#host-install-process)
+    - [Network configuration verification and repair](#network-configuration-verification-and-repair)
+  - [MicroK8s Configuration](#microk8s-configuration)
+  - [Ingress Traffic and Load Balancing](#ingress-traffic-and-load-balancing)
+  - [Troubleshooting](#troubleshooting)
+  - [Resources](#resources)
+
 ## Environment
 
 It's really just three BeeLink EQ6 Mini PCs, a 16-port managed switch, and an existing
@@ -42,75 +55,88 @@ OpnSense router/firewall.
 - Backup Service (Velero, with which target?  S3?  What will that cost?)
   
 ### Networking
-- Off-LAN access to services will require TailScale:
-	- Tailscale client will need to be configured on each node.
-- Kubernetes Nodes will have their data network interface set in the following network/range:
-	- Network: 192.168.2.0/23
-	- Netmask: 255.255.254.0
-	- Default Route: 192.168.2.1
-	- DNS Servers: 192.168.2.1,9.9.9.9
-	- IP Range: 192.168.3.1 - 192.168.3.30 (CIDR: 192.168.3.0/27)
-- Storage network interfaces will be set in the following network/range:
-	- Network: 192.168.4.0/23
-	- Netmask: 255.255.254.0
-	- IP Range: 192.168.5.1 - 192.168.5.30 (CIDR: 192.168.5.0/27)
-- We will try using MetalLB for load balancing of resources running in the cluster:
-	- Network: 192.168.2.0/23
-	- IP Range: 192.168.3.33 - 192.168.62 (CIDR: 192.168.3.32/27)
-- MicroK8s uses the following networks by default (for reference):
-	- Cluster CIDR: 10.1.0.0/16
-	- Service Cluster IP Range: 10.152.183.0/24
-	- Cluster DNS: 10.152.183.10
 
-## Host Install Process:
+- Off-LAN access to services will require TailScale:
+  - Tailscale client will need to be configured on each node.
+- Kubernetes Nodes will have their data network interface set in the following network/range:
+  - Network: 192.168.2.0/23
+  - Netmask: 255.255.254.0
+  - Default Route: 192.168.2.1
+  - DNS Servers: 192.168.2.1,9.9.9.9
+  - IP Range: 192.168.3.1 - 192.168.3.30 (CIDR: 192.168.3.0/27)
+- Storage network interfaces will be set in the following network/range:
+  - Network: 192.168.4.0/23
+  - Netmask: 255.255.254.0
+  - IP Range: 192.168.5.1 - 192.168.5.30 (CIDR: 192.168.5.0/27)
+- We will try using MetalLB for load balancing of resources running in the cluster:
+  - Network: 192.168.2.0/23
+  - IP Range: 192.168.3.33 - 192.168.62 (CIDR: 192.168.3.32/27)
+  - MicroK8s uses the following networks by default (for reference):
+  - Cluster CIDR: 10.1.0.0/16
+  - Service Cluster IP Range: 10.152.183.0/24
+  - Cluster DNS: 10.152.183.10
+- Longhorn Storage Engine will need a network range for use of Multus:
+  - 192.168.5.129-192.168.5.254
+
+## Host Install Process
+
 1. Configure UEFI settings on the system to support Core OS install:
-	1. Setting: Boot -> Quiet Boot -> DIsable
-	2. Setting: Advanced -> AMD CBS -> FCH Common -> AC Power Loss -> Previous
-	3. Setting: Security -> Secure Boot Mode -> Set to "Standard"
-	4. Setting: Security -> Secure Boot -> Enabled
+   1. Setting: Boot -> Quiet Boot -> DIsable
+   2. Setting: Advanced -> AMD CBS -> FCH Common -> AC Power Loss -> Previous
+   3. Setting: Security -> Secure Boot Mode -> Set to "Standard"
+   4. Setting: Security -> Secure Boot -> Enabled
 2. Create an Ubuntu Server 24.04.1 USB Boot device using Balena Etcher or Rufus.  Insert into the Beelink PC, press "F7" at the boot screen to select a boot device.  Select to boot from the "Generic Mass Storage" device.
 3. In Ubuntu Installer:
-	1. For "Choose Type of Installation", select "Ubuntu Server (minimized)"
-	2. Configure static IP addresses for all interfaces, using config table.
-	3. For "Guided storage configuration", select "Use an entire disk", and be sure to select the 500Gb (465.761 GiB) drive for the install.
-	4. For profile configuration:
-		1. Name: Hive Administration Professional
-		2. Server name: beehive\[1-3\]
-		3. Username: queenbee
-		4. Password: REDACTED
-	5. Ubuntu Pro: Skip for now
-	6. SSH Config: 
-		1. Select to install SSH Server
-		2. For authorized keys, select "Launchpad" as the import source, select "jgregmac" as the username.
-	7. Featured Server Snaps: Select Microk8s.  May as well...
-	8. Run installation to completion, then reboot, verify console login.
+   1. For "Choose Type of Installation", select "Ubuntu Server (minimized)"
+   2. Configure static IP addresses for all interfaces, using config table.
+   3. For "Guided storage configuration", select "Use an entire disk", and be sure to select the 500Gb (465.761 GiB) drive for the install.
+   4. For profile configuration:
+      1. Name: Hive Administration Professional
+      2. Server name: beehive\[1-3\]
+      3. Username: queenbee
+      4. Password: REDACTED
+   5. Ubuntu Pro: Skip for now
+   6. SSH Config:
+      1. Select to install SSH Server
+      2. For authorized keys, select "Launchpad" as the import source, select "jgregmac" as the username.
+      3. Featured Server Snaps: Select Microk8s.  May as well...
+      4. Run installation to completion, then reboot, verify console login.
 4. Post install:
-	```shell
-	# Apply latest patches:
-	sudo apt update
-	sudo apt -y upgrade
-	# Install commonly needed diagnostic tools:
-	sudo apt -y install git iputils-ping net-tools vim
-	# Allow access to microk8s commands:
-	sudo usermod -a -G microk8s queenbee
-	newgrp microk8s
 
-	# We will need to enable hugepages in the kernel for Mayastor.
-	# On each node:
-	$ echo vm.nr_hugepages = 1024 \
-		| sudo tee -a /etc/sysctl.d/20-microk8s-hugepages.conf
-	vm.nr_hugepages = 1024
-	# Install extra modules for nvme-tcp module
-	# (Its probably already present):
-	sudo apt-get install linux-modules-extra-$(uname -r)
-	# Load the module:
-	sudo modprobe nvme-tcp
-	# Configure the module to load on startup:
-	echo 'nvme-tcp' \
-		| sudo tee -a /etc/modules-load.d/microk8s-mayastor.conf
-	# Reboot!
-	sudo reboot
-	```
+    ```shell
+    # Apply latest patches:
+    sudo apt update
+    sudo apt -y upgrade
+    
+    # Install commonly needed diagnostic tools:
+    sudo apt -y install git iputils-ping net-tools vim zsh
+
+    # Improve the shell using oh-my-zsh, for your own sanity:
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+    
+    # Allow access to microk8s commands:
+    sudo usermod -a -G microk8s queenbee
+    newgrp microk8s
+
+    # We will need to enable hugepages in the kernel for Mayastor.
+    # On each node:
+    $ echo vm.nr_hugepages = 1024 \
+        | sudo tee -a /etc/sysctl.d/20-microk8s-hugepages.conf
+    vm.nr_hugepages = 1024
+
+    # Install extra modules for nvme-tcp module
+    # (Its probably already present):
+    sudo apt-get install linux-modules-extra-$(uname -r)
+    
+    # Load the module:
+    sudo modprobe nvme-tcp
+    
+    # Configure the module to load on startup:
+    echo 'nvme-tcp' \
+        | sudo tee -a /etc/modules-load.d/microk8s-mayastor.conf
+    # Reboot!
+    sudo reboot
+    ```
 
 ### Network configuration verification and repair
 
@@ -189,9 +215,9 @@ OpnSense router/firewall.
 
 1. Create a Service for the Engine Ingress that gives a MetalLB static IP to the controller
 2. Obtain a duckdns.org address, get the auth token for the address.
-3. Configure local router to redirect \*.mackinnon.duckdns.org queries to the ingress IP 
+3. Configure local router to redirect \*.mackinnon.duckdns.org queries to the ingress IP
 4. Install the cert-manager-duckdns-webhook using Helm
-5. Create increases! Nginx annotations of note:  
+5. Create ingresses! Nginx annotations of note:  
    <https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/#backend-protocol>
 
 ## Troubleshooting
@@ -203,23 +229,30 @@ Name resolution problems:
 
 ## Resources
 
+DNS Troubleshooting in Kubernetes:  
+<https://kubernetes.io/docs/tasks/administer-cluster/dns-debugging-resolution/>
+
 Nginx Ingress Annotations:  
-https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/
+<https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/>
 
 Cert-Manager Ingress Annotation:  
-https://cert-manager.io/docs/usage/ingress/
+<https://cert-manager.io/docs/usage/ingress/>
 
 Troubleshooting ACME Certificate Issuance with cert-manager:  
-https://cert-manager.io/docs/troubleshooting/acme/
+<https://cert-manager.io/docs/troubleshooting/acme/>
 
 Source / Documentation for the DuckDNS webhook for cert-manager:  
-https://github.com/csp33/cert-manager-duckdns-webhook/tree/master
+<https://github.com/csp33/cert-manager-duckdns-webhook/tree/master>
 
 Example: Exposing the Kubernetes Dashboard using Ingress on MicroK8s:  
-https://jonathangazeley.com/2020/09/16/exposing-the-kubernetes-dashboard-with-an-ingress/
+<https://jonathangazeley.com/2020/09/16/exposing-the-kubernetes-dashboard-with-an-ingress/>
 
 MicroK8s cluster upgrade procedure:  
-https://microk8s.io/docs/upgrade-cluster
+<https://microk8s.io/docs/upgrade-cluster>
 
 Ubuntu snap management: purging or deleting snapshot backups:  
-https://askubuntu.com/questions/1354549/how-do-you-purge-a-removed-app-or-delete-snapshot-after-app-removal
+<https://askubuntu.com/questions/1354549/how-do-you-purge-a-removed-app-or-delete-snapshot-after-app-removal>
+
+Removing a node from a MicroK8s cluster:  
+(Dirtly little trick for solving node problems... leave and re-join.)  
+<https://microk8s.io/docs/clustering#removing-a-node>

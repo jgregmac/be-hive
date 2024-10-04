@@ -1,0 +1,13 @@
+app:
+  ingress:
+    enabled: true
+    hosts:
+      - dashboard.be-hive.cloud
+    ingressClassName: public
+    pathType: Prefix
+    useDefaultAnnotations: false
+    annotations:
+      nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    tls:
+      enabled: true
+      secretName: be-hive-cloud-tls

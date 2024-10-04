@@ -1,0 +1,28 @@
+# We will need a Kubernetes replicator to get the resulting cert into other namespaces...
+
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: be-hive-cloud-tls
+  namespace: ingress
+spec:
+  dnsNames:
+  - '*.be-hive.cloud'
+  - 'be-hive.cloud'
+  issuerRef:
+    group: cert-manager.io
+    kind: ClusterIssuer
+    name: cloudflare-staging
+  secretName: be-hive-cloud-tls
+  usages:
+  - digital signature
+  - key encipherment
+  secretTemplate:
+    annotations:
+      # These allotations enable replication of the resulting secret to neighboring
+      # namespaces, where it will be needed for additional ingresses:
+      reflector.v1.k8s.emberstack.com/reflection-allowed: "true"
+      reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces: kubernetes-dashboard,longhorn-system,nextcloud
+      reflector.v1.k8s.emberstack.com/reflection-auto-enabled: "true"
+
+

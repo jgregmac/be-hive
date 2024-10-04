@@ -1,9 +1,12 @@
 # Use nginx instead of apache. works around hugepage problem???
-image.flavor: fpm
-nginx.enabled: true
+image:
+  flavor: fpm
+nginx:
+  enabled: true
 
 # Database configuration:
-internalDatabase.enabled: false
+internalDatabase:
+  enabled: false
 externalDatabase:
   enabled: true
   host: my-postgresql.nextcloud.svc.cluster.local
@@ -12,19 +15,31 @@ externalDatabase:
 postgresql:
   enabled: true
   global:
-    defaultStorageClass: mayastor-2x-replica
-    postgresql:
-      auth.password: "FIRST_PASSWORD"
+    # defaultStorageClass is ignored for primary replica persistent disk. Worthless!
+    # defaultStorageClass: longhorn-ssd-double
+    postgresql: # <- TODO: Verify the key.  This looks incorrect.
+      auth:
+        password: "FIRST_PASSWORD"
+        secretKeys:
+          adminPasswordKey:
+          userPasswordKey:
       primary.persistence.enabled: true
+  primary:
+    persistence:
+      enabled: true
+      size: 16Gi
+      storageClass: longhorn-ssd-double
 
 # Storage:
 persistence:
   enabled: true
-  storageClass: mayastor-2x-replica
+  storageClass: longhorn-ssd-double
   size: 512Gi
 
 # Nextcloud configuration:
 nextcloud:
+  host: nextcloud.be-hive.cloud
+  # Uncomment if using Apache with Hugepages enabled on the K8s nodes.  We are using nginx!
   # extraVolumes:
   #   - name: hugepages
   #     emptyDir:
@@ -32,8 +47,33 @@ nextcloud:
   # extraVolumeMounts:
   #   - name: hugepages
   #     mountPath: /dev/hugepages
-  password: "SECOND_PASSWORD"
-
+  # password: "SECOND_PASSWORD"
+  existingSecret:
+    enabled: true
+    secretName:
+    usernameKey:
+    passwordKey:
+  configs:
+    # Change logging behavior. By default, logging is disabled.
+    # Note: loglevels: 0=DEBUG, 1=INFO, 2=WARN, 3=ERROR, 4=FATAL
+    logging.config.php: |-
+      <?php
+      $CONFIG = array (
+        'log_type' => 'file',
+        'logfile' => '/dev/stdout',
+        'loglevel' => 1,
+        'logdateformat' => 'F d, Y H:i:s'
+        );
+    # Adds X-Forwareded-For header to incomming HTTP messages:
+    proxy.config.php: |-
+      <?php
+      $CONFIG = array (
+        'trusted_proxies' => array(
+          0 => '127.0.0.1',
+          1 => '10.0.0.0/8',
+        ),
+        'forwarded_for_headers' => array('HTTP_X_FORWARDED_FOR'),
+      );
 # resources:
 #   requests:
 #     hugepages-2Mi: 500Mi
@@ -45,9 +85,14 @@ nextcloud:
 #     # note that Kubernetes currently requires cpu or memory requests and limits before hugepages are allowed.
 #     memory: 1Gi
 
+# Redis is not enabled by default.  Do we want it?
+redis:
+  enabled: false
+
 ingress:
+  enabled: true
+  className: public
   annotations:
-    cert-manager.io/cluster-issuer: duckdns-letsencrypt-prod
     nginx.ingress.kubernetes.io/enable-cors: "true"
     nginx.ingress.kubernetes.io/cors-allow-headers: "X-Forwarded-For"
     nginx.ingress.kubernetes.io/server-snippet: |-
@@ -76,5 +121,5 @@ ingress:
       }
   tls:
   - hosts:
-    - nextcloud.mackinnon.duckdns.org
-    secretName: nextcloud-letsencrypt-tls
+    - nextcloud.be-hive.cloud
+    secretName: be-hive-cloud-tls

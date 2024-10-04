@@ -1,0 +1,26 @@
+cluster-init: true
+tls-san: 192.168.3.1
+token: J01N.D3M.N0D3Z.UP.D00DZ
+write-kubeconfig-mode: 644
+
+# Networking options (defaults for reference, commented out)
+# cluster-cidr: 10.42.0.0/16
+# cluster-domain: cluster.local
+# cluster-dns: 10.43.0.10
+# service-cidr: 10.43.0.0/16
+# service-node-port-range: 30000-32767
+# Set flannel to use IP routes to control traffic instead of VXLAN encapsulation. This
+# should provide better performance:
+flannel-backend: host-gw
+# If we later choose to disable flannel, we can do so with the following:
+# flannel-backend: none
+# disable-network-policy: true
+
+# Comma separated list of services to disable.
+# Available options: coredns, local-storage, metrics-server, servicelb, traefik 
+disable: local-storage,servicelb
+
+# For longhorn deployment, node annotations also are needed, but are not supported by
+# k3s at deployment time:
+node-label: 
+  - node.longhorn.io/create-default-disk=config

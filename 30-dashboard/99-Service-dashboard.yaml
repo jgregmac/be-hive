@@ -8,7 +8,7 @@ metadata:
   labels:
     k8s-app: kubernetes-dashboard
   name: kubernetes-dashboard
-  namespace: kube-system
+  namespace: kubernetes-dashboard
 spec:
   allocateLoadBalancerNodePorts: true
   # Generated randomly.  Should not be part of a generic manifest:

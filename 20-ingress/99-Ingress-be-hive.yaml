@@ -1,0 +1,25 @@
+# NOTE: We are not using this ingress at present.  There was the indea that we might
+# use the master/minion model for the Nginx ingress, and use the "master" to manage the
+# Ingress wildcard certificate, but that proved to be impractical.
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: be-hive
+  namespace: ingress
+  annotations:
+    nginx.org/mergeable-ingress-type: master
+    # DO NOT use this annotation: We will not be able to control certificate
+    # replication to required namespaces if we trigger cert creation from the ingress!
+    # cert-manager.io/cluster-issuer: cloudflare-le-staging
+    # DO NOT use this annotation here.  It is not true for all minion ingresses:
+    # nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+spec:
+  rules:
+  - host: "dashboard.be-hive.cloud"
+  - host: "longhorn.be-hive.cloud"
+  tls:
+  - hosts:
+    - "be-hive.cloud"
+    - "*.be-hive.cloud"
+    secretName: be-hive-cloud-tls
