@@ -3,11 +3,15 @@ app:
     enabled: true
     hosts:
       - dashboard.be-hive.cloud
-    ingressClassName: public
+    ingressClassName: nginx
     pathType: Prefix
     useDefaultAnnotations: false
     annotations:
-      nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+      ingress.kubernetes.io/ssl-redirect: "true"
+      # Comma separated list of services, defined in the ingress, which use TLS on the back-end:
+      nginx.org/ssl-services: "kubernetes-dashboard-kong-proxy"
+      # Obsolete annotation from earlier version of Nginx Ingress Controller:
+      # nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
     tls:
       enabled: true
       secretName: be-hive-cloud-tls

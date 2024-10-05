@@ -1,3 +1,7 @@
+# This manifest if for reference.  It is neeeded if running on MicroK8s.
+# The manifest creates a service with a fixed IP for use by all ingresses deployed on
+# the MicroK8s cluster.
+
 # Create a MetalLB Load Balancer for the Kubernetes Ingress:
 apiVersion: v1
 kind: Service

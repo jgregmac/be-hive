@@ -1,30 +1,25 @@
 # Setup and Access for the Kubernetes Dashboard
 
 The Kubernetes dashboard included with MicroK8s is v2.6.0, from 2022.  Literally 2.5
-years old at the time of the K8s 1.31 release!
+years old at the time of the K8s 1.31 release!  We will NOT enabled that add-on, and instead will install the dashboard from source:
 
 ## Install
 
 ```bash
 # Add kubernetes-dashboard repository
 helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
-# Deploy a Helm Release named "kubernetes-dashboard" using the kubernetes-dashboard chart
+# Deploy a Helm Release named "kubernetes-dashboard" using the kubernetes-dashboard chart.
+# Our values file defines an ingress that works for our environment:
 helm install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard \
     -f 10-dashboard-values.yaml \
     --create-namespace -n kubernetes-dashboard
-```
-
-## Deploy an Ingress for dashbaord access
-
-```shell
-kubectl apply -f 10-Ingress-dashboard.yaml
 ```
 
 ## Configure Private DNS
 
 At the router, access the DNS service config, and add a new A record override:
 
-dashboard.mackinnon.duckdns.org -> 192.168.3.33
+dashboard.be-hive.cloud -> 192.168.3.33
 
 ## Create a service account and token
 

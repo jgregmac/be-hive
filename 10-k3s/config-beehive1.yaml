@@ -1,3 +1,5 @@
+# Place in /etc/rancher/k3s/config.yaml
+
 cluster-init: true
 tls-san: 192.168.3.1
 token: J01N.D3M.N0D3Z.UP.D00DZ
@@ -17,8 +19,13 @@ flannel-backend: host-gw
 # disable-network-policy: true
 
 # Comma separated list of services to disable.
-# Available options: coredns, local-storage, metrics-server, servicelb, traefik 
-disable: local-storage,servicelb
+# Available options: coredns, local-storage, metrics-server, servicelb, traefik
+# ? Should we disable local-storage?
+disable: servicelb,traefik
+# Do we need this if we disable servicelb and install metallb?
+# disable-cloud-controller: true
+
+embedded-registry: true
 
 # For longhorn deployment, node annotations also are needed, but are not supported by
 # k3s at deployment time:

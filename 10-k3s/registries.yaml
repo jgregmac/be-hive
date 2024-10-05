@@ -1,0 +1,6 @@
+# Place file in /etc/rancher/k3s/registries.yaml
+mirrors:
+  docker.elastic.co:
+  docker.io:
+  quay.io:
+  registry.k8s.io:

@@ -18,14 +18,12 @@ Note that Lonhorn uses a "Settings" CRD for storing service settings in Kubernet
 
 ## Installation
 
-1. Install Multus CNI using the "thin mode" manifests:
-   `kubectl apply -f https://raw.githubusercontent.com/k8snetworkplumbingwg/multus-cni/master/deployments/multus-daemonset.yml`
 2. Update node labels for Longhorn and apply:
 
     ```bash
-    kubectl patch node beehive1 -f 10-disk-annotations.yaml
-    kubectl patch node beehive2 -f 10-disk-annotations.yaml
-    kubectl patch node beehive3 -f 10-disk-annotations.yaml
+    kubectl patch node beehive1 --patch-file 10-disk-annotations.yaml
+    kubectl patch node beehive2 --patch-file 10-disk-annotations.yaml
+    kubectl patch node beehive3 --patch-file 10-disk-annotations.yaml
     ```
 
 3. Format and mount NVMe storage for Longhorn:
@@ -39,6 +37,14 @@ Note that Lonhorn uses a "Settings" CRD for storing service settings in Kubernet
     $ echo "/dev/disk/by-label/longhorn /var/mnt/longhorn ext4 defaults 0 1" >> /etc/fstab
     $ reboot
     ```
+
+4. Prepare an HTAccess secret to protect the longhorn UI:
+
+    ```shell
+    # You will need to create an htaccess entry, add it to this secret manifest, then apply:
+    kubectl apply -f 10-Secret-basic-auth.yaml
+    ```
+5. Install Longhorn
 
 ## References
 

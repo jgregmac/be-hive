@@ -222,10 +222,15 @@ OpnSense router/firewall.
 
 ## Troubleshooting
 
-Name resolution problems:
+### Name resolution problems
 
 - Disable all DHCP assignments in `/etc/netplan/*` then apply using `sudo netplan apply`
 - If the local DNS server (opnsense) is causing problems, we can bypass it by editing `/run/systemd/resolve/resolv.conf` then running `sudo systemctl restart systemd-resolved`
+
+### Reconfiguring K3s after installation
+
+1. Edit the local `/etc/rancher/k3s/config.yaml` with the desired changes.
+2. Run: `sudo systemctl daemon-reload && sudo systemctl restart k3s`. Changes in the local config are applied on restart!
 
 ## Resources
 
