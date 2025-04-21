@@ -14,7 +14,9 @@ But for K3s, it is recommended to use the Rancher chart:
     helm repo update
     ```
 
-2. Prepare a values file with whereabouts sub-chart.
+2. Prepare a values file with whereabouts sub-chart.  
+   (NOTE: Post October 2024, the multus helm values recommended for install with
+   whereabouts have changed.  A more stable "bin" path has been supplied.)
 3. Install:
 
     ```shell
@@ -23,9 +25,14 @@ But for K3s, it is recommended to use the Rancher chart:
     ```
 
 4. Once installed, we can create a network attachment definition that will
-allow pods that need to use the storage network to attach an interface 
+allow pods that need to use the storage network to attach an interface
 automatically, when needed:
 
     ```shell
     kubectl apply -f 20-networkAttachmentDefinition.yaml
     ```
+
+## References
+
+Installing Multus on K3s:  
+<https://docs.k3s.io/networking/multus-ipams>

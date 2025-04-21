@@ -8,11 +8,15 @@ Hat operator catalog for OpenShift.
 ```shell
 # Install from the helm chart into the "ingress" namespace.
 # use the values file to force the ingress to run on a pre-selected IP address.
-helm install nginx-ingress oci://ghcr.io/nginxinc/charts/nginx-ingress \
-    --version 1.4.0 \
+helm install my-release oci://ghcr.io/nginx/charts/nginx-ingress \
+    --version 2.1.0\
     -n ingress --create-namespace \
     -f 10-ingress-values.yaml
 ```
+
+Odd as it may seem, we are going to deploy separate Ingress resources for each service that we wish to expose outside
+of the cluster. This seems goofy to an OpenShift admin, but here we don't have the concept of "default Routes" under
+which all resources will be exposed.  Unless I am missing something?
 
 ## References
 

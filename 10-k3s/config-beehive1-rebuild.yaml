@@ -1,9 +1,7 @@
-### NODE-SPECIFIC VALUES:
-server: https://192.168.3.1:6443
-tls-san: 192.168.3.3,192.168.5.3,beehive3,beehive3.home.arpa
-node-ip: 192.168.3.3
-
-### SHARED VALUES:
+# Place in /etc/rancher/k3s/config.yaml
+server: https://192.168.3.2:6443
+tls-san: 192.168.3.1,192.168.5.1,beehive1,beehive1.home.arpa
+node-ip: 192.168.3.1
 token: REDACTED_ K3S_TOKEN_VALUE
 write-kubeconfig-mode: 644
 
@@ -25,6 +23,8 @@ flannel-iface: enp5s0
 # Available options: coredns, local-storage, metrics-server, servicelb, traefik
 # ? Should we disable local-storage?
 disable: servicelb,traefik
+# Do we need this if we disable servicelb and install metallb?
+# disable-cloud-controller: true
 
 embedded-registry: true
 

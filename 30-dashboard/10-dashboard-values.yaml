@@ -15,3 +15,11 @@ app:
     tls:
       enabled: true
       secretName: be-hive-cloud-tls
+    # IF WE WANTED TO, we could add annotations to the helm-generated Ingress resource
+    # that would automate issuace of dedicated cert for this service.
+    # WE DON"T WANT THIS, so set scope to disabled:
+    issuer:
+      name: cloudflare-le-prod
+      # Scope determines what kind of issuer annotation will be used on ingress resource
+      # - cluster - adds 'cert-manager.io/cluster-issuer'
+      scope: disabled

@@ -27,7 +27,7 @@ See:
 <https://github.com/kubernetes/dashboard/blob/master/docs/user/access-control/creating-sample-user.md>
 
 ```shell
-kubectl apply -f 10-DashboardAccountToken.yaml
+kubectl apply -f 20-DashboardAccountToken.yaml
 ```
 
 ## Accessing the long-lived token

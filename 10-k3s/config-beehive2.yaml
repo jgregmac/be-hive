@@ -1,6 +1,10 @@
+### NODE-SPECIFIC VALUES:
 server: https://192.168.3.1:6443
-tls-san: 192.168.3.2
-token: J01N.D3M.N0D3Z.UP.D00DZ
+tls-san: 192.168.3.2,192.168.5.2,beehive2,beehive2.home.arpa
+node-ip: 192.168.3.2
+
+### SHARED VALUES:
+token: REDACTED_ K3S_TOKEN_VALUE
 write-kubeconfig-mode: 644
 
 # Networking options (defaults for reference, commented out)
@@ -15,6 +19,7 @@ flannel-backend: host-gw
 # If we later choose to disable flannel, we can do so with the following:
 # flannel-backend: none
 # disable-network-policy: true
+flannel-iface: enp5s0
 
 # Comma separated list of services to disable.
 # Available options: coredns, local-storage, metrics-server, servicelb, traefik
@@ -24,5 +29,5 @@ disable: servicelb,traefik
 embedded-registry: true
 # For longhorn deployment, node annotations also are needed, but are not supported by
 # k3s at deployment time:
-node-label: 
+node-label:
   - node.longhorn.io/create-default-disk=config

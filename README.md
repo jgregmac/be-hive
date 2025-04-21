@@ -1,9 +1,9 @@
 # The Be-hive: A Self-Hosting Experiment
 
-Let's try using MicroK8s on NUC-class Micro PCs with a replicated storage engine to host
-cloud-like services at home.  Because why would you NOT want to take on the burden of
-running an entire cloud suite of services WITH hardware maintenance obligations,
-entirely in your spare time?
+Let's try using ~~MicroK8s~~ K3S on NUC-class Micro PCs with a replicated storage engine
+to host cloud-like services at home.  Because why would you NOT want to take on the
+burden of running an entire cloud suite of services WITH hardware maintenance
+obligations, entirely in your spare time?
 
 - [The Be-hive: A Self-Hosting Experiment](#the-be-hive-a-self-hosting-experiment)
   - [Environment](#environment)
@@ -13,9 +13,21 @@ entirely in your spare time?
     - [Networking](#networking)
   - [Host Install Process](#host-install-process)
     - [Network configuration verification and repair](#network-configuration-verification-and-repair)
-  - [MicroK8s Configuration](#microk8s-configuration)
-  - [Ingress Traffic and Load Balancing](#ingress-traffic-and-load-balancing)
+  - [K3S Configuration](#k3s-configuration)
+    - [Install additional nodes, or re-install a node](#install-additional-nodes-or-re-install-a-node)
+    - [Install MetalLB](#install-metallb)
+    - [Install Reflector](#install-reflector)
+    - [Install Cert-Manager](#install-cert-manager)
+    - [Install Ingress](#install-ingress)
+    - [Install Dashboard](#install-dashboard)
+    - [Install Multus](#install-multus)
+    - [Install Longhorn](#install-longhorn)
+    - [Next steps: Kubevirt? Nextcloud Helm Chart?](#next-steps-kubevirt-nextcloud-helm-chart)
+  - [~~MicroK8s Configuration~~](#microk8s-configuration)
+  - [~~Ingress Traffic and Load Balancing~~](#ingress-traffic-and-load-balancing)
   - [Troubleshooting](#troubleshooting)
+    - [Name resolution problems](#name-resolution-problems)
+    - [Reconfiguring K3s after installation](#reconfiguring-k3s-after-installation)
   - [Resources](#resources)
 
 ## Environment
@@ -99,43 +111,46 @@ OpnSense router/firewall.
    6. SSH Config:
       1. Select to install SSH Server
       2. For authorized keys, select "Launchpad" as the import source, select "jgregmac" as the username.
-      3. Featured Server Snaps: Select Microk8s.  May as well...
+      3. ~~Featured Server Snaps: Select Microk8s.  May as well...~~
       4. Run installation to completion, then reboot, verify console login.
 4. Post install:
 
     ```shell
-    # Apply latest patches:
-    sudo apt update
-    sudo apt -y upgrade
-    
     # Install commonly needed diagnostic tools:
     sudo apt -y install git iputils-ping net-tools vim zsh
 
     # Improve the shell using oh-my-zsh, for your own sanity:
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+
+    # Apply latest patches:
+    sudo apt update
+    sudo apt -y upgrade
+
+    # Reboot!
+    sudo reboot
     
+    ### SKIP THESE OBSOLETE PREREQUISITES!
     # Allow access to microk8s commands:
-    sudo usermod -a -G microk8s queenbee
-    newgrp microk8s
+    # sudo usermod -a -G microk8s queenbee
+    # newgrp microk8s
 
     # We will need to enable hugepages in the kernel for Mayastor.
+    # (Also needed for Longhorn v2 storage engines, which we are not planning to use.)
     # On each node:
-    $ echo vm.nr_hugepages = 1024 \
-        | sudo tee -a /etc/sysctl.d/20-microk8s-hugepages.conf
-    vm.nr_hugepages = 1024
+    # $ echo vm.nr_hugepages = 1024 \
+    #     | sudo tee -a /etc/sysctl.d/20-microk8s-hugepages.conf
+    # vm.nr_hugepages = 1024
 
     # Install extra modules for nvme-tcp module
     # (Its probably already present):
-    sudo apt-get install linux-modules-extra-$(uname -r)
+    # sudo apt-get install linux-modules-extra-$(uname -r)
     
     # Load the module:
-    sudo modprobe nvme-tcp
+    # sudo modprobe nvme-tcp
     
     # Configure the module to load on startup:
-    echo 'nvme-tcp' \
-        | sudo tee -a /etc/modules-load.d/microk8s-mayastor.conf
-    # Reboot!
-    sudo reboot
+    # echo 'nvme-tcp' \
+    #     | sudo tee -a /etc/modules-load.d/microk8s-mayastor.conf
     ```
 
 ### Network configuration verification and repair
@@ -161,7 +176,68 @@ OpnSense router/firewall.
     Link 4 (wlp3s0): 
     ```
 
-## MicroK8s Configuration
+## K3S Configuration
+
+### Install additional nodes, or re-install a node
+
+```bash
+# If reinstalling a node, you will need to clean up any artifacts from previous installs:
+/usr/local/bin/k3s-uninstall.sh
+sudo rm /etc/rancher/node/password
+# From a working node:
+kubectl delete node beehive[#]
+# Longhorn cleanup procedure before reinstalling node?
+sudo  umount /var/mnt/longhorn
+# (Then see 40-longhorn/README.md for instructions on preparing the node for Longhorn.)
+
+# Prepare the k3s install directory:
+sudo mkdir /etc/rancher
+sudo mkdir /etc/rancher/k3s
+
+# Copy in the required configuration files:
+sudo cp config-beehive[#].yaml /etc/rancher/k3s/config.yaml
+sudo cp registries.yaml /etc/rancher/k3s/
+
+# Install and start K3s (which should use the config.yaml file to configure k3s)
+# (This command was taken from a second cluster node.  Apparently I did not capture
+# the original cluster setup commands.)
+curl -sfL https://get.k3s.io | sh -s -
+
+# NOTE that we can install a specific version by injecting an ENV var into the CLI:
+# (This is necessary if we are not running the current k3s release when re-creating a 
+# node in the cluster.)
+curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION=v1.30.5+k3s1 sh -s -
+
+# Check the service status:
+systemctl status k3s
+journalctl -xeu k3s.service
+k3s kubectl get nodes
+
+# Make the K3S config accessible to other utilities, such as `cmctl`:
+export KUBECONFIG=/etc/rancher/k3s/k3s.yaml >> ~/.zshrc
+
+
+
+lsblk
+```
+
+### Install MetalLB
+
+### Install Reflector
+
+### Install Cert-Manager
+
+### Install Ingress
+
+### Install Dashboard
+
+### Install Multus
+
+### Install Longhorn
+
+### Next steps: Kubevirt? Nextcloud Helm Chart?
+
+## ~~MicroK8s Configuration~~
 
 1. Form an HA Cluster:
 
@@ -211,7 +287,11 @@ OpnSense router/firewall.
     # What are you thinking? DO NOT install Mayastor!
     ```
 
-## Ingress Traffic and Load Balancing
+## ~~Ingress Traffic and Load Balancing~~
+
+Currently we are using CloudFlare as a DNS provider with Let's Encrypt for certificates.
+These steps were used when attempting to use DuckDns with Let's Encrypt, which was
+pretty difficult to support.
 
 1. Create a Service for the Engine Ingress that gives a MetalLB static IP to the controller
 2. Obtain a duckdns.org address, get the auth token for the address.

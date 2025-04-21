@@ -22,6 +22,7 @@ spec:
       # These allotations enable replication of the resulting secret to neighboring
       # namespaces, where it will be needed for additional ingresses:
       reflector.v1.k8s.emberstack.com/reflection-allowed: "true"
+      # NOTE: ALL LISTED NAMESPACES MUST EXIST, OR THE REFLECTOR WILL FAIL!
       reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces: ingress,kubernetes-dashboard,longhorn-system,nextcloud
       reflector.v1.k8s.emberstack.com/reflection-auto-enabled: "true"
 
