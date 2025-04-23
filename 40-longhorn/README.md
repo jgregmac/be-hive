@@ -67,7 +67,11 @@ Note that Lonhorn uses a "Settings" CRD for storing service settings in Kubernet
 
     ```bash
     helm repo add longhorn https://charts.longhorn.io
-    helm install longhorn longhorn/longhorn --namespace longhorn-system --create-namespace --version 1.8.1
+    helm install longhorn longhorn/longhorn \
+        -n longhorn-system \
+        --create-namespace \
+        --version 1.8.1 \
+        -f longhorn/20-longhorn-custom-values.yaml
 
     # Check for created resources:
     kubectl -n longhorn-system get pod
