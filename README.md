@@ -55,9 +55,12 @@ OpnSense router/firewall.
 
 ### Software
 
-- Ubuntu Server 24.04
-- MicroK8S Kubernetes
-- OpenEBS replicated storage (Mayastor)
+- Ubuntu Server 24.04  
+  (Maybe we should have used [Elemental](https://elemental.docs.rancher.com/)?)
+- ~~MicroK8S Kubernetes~~
+- ~~OpenEBS replicated storage (Mayastor)~~
+- K3s Kubernetes
+- Longhorn Storage Engine
 - Nginx ingress
 - MetalLB Load Balancer
 - cert-manager
@@ -215,10 +218,6 @@ k3s kubectl get nodes
 
 # Make the K3S config accessible to other utilities, such as `cmctl`:
 export KUBECONFIG=/etc/rancher/k3s/k3s.yaml >> ~/.zshrc
-
-
-
-lsblk
 ```
 
 ### Install MetalLB
