@@ -1,9 +1,11 @@
-# Installing KubeVirt
+# KubeVirt on K3s
+
+## Install
 
 Validate the host is ready for virtualization:
 
 ```bash
-sudo apt install libvirt-clients
+$ sudo apt install -y libvirt-clients
 $ sudo  virt-host-validate qemu
   QEMU: Checking for hardware virtualization                                 : PASS
   QEMU: Checking if device /dev/kvm exists                                   : PASS
@@ -48,4 +50,22 @@ Client Version: version.Info{GitVersion:"v1.5.0", GitCommit:"522b44c0ce8d1909618
 Server Version: version.Info{GitVersion:"v1.5.0", GitCommit:"522b44c0ce8d1909618324cb083d69e5c7a0a234", GitTreeState:"clean", BuildDate:"2025-03-13T19:53:21Z", GoVersion:"go1.23.4 X:nocoverageredesign", Compiler:"gc", Platform:"linux/amd64"}
 ```
 
-But can you actully run anything?  We will find out later.
+## Test
+
+It even works, too... at least at a basic level.  Run through the lab here to verify:  
+<https://kubevirt.io/labs/kubernetes/lab1>
+
+## Install Container Data Importer (CDI)
+
+...
+
+## Enable Live Migration
+
+```bash
+kubectl apply -f 20-ConfigMap-live-migration.yaml
+```
+
+Then test live migration using this lab:  
+<https://kubevirt.io/labs/kubernetes/migration.html>
+
+It actually works!  Holy $***!

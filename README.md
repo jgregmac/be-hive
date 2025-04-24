@@ -1,9 +1,9 @@
 # The Be-hive: A Self-Hosting Experiment
 
-Let's try using ~~MicroK8s~~ K3S on NUC-class Micro PCs with a replicated storage engine
-to host cloud-like services at home.  Because why would you NOT want to take on the
-burden of running an entire cloud suite of services WITH hardware maintenance
-obligations, entirely in your spare time?
+Let's try using K3S Kuberenetes on NUC-class Micro PCs with a replicated storage engine
+to host cloud-like services entirely at home.  Because why would you NOT want to take on
+the burden of running an entire cloud suite of services ALONG WITH hardware maintenance
+obligations, entirely in your "copious" spare time?
 
 - [The Be-hive: A Self-Hosting Experiment](#the-be-hive-a-self-hosting-experiment)
   - [Environment](#environment)
@@ -22,6 +22,7 @@ obligations, entirely in your spare time?
     - [Install Dashboard](#install-dashboard)
     - [Install Multus](#install-multus)
     - [Install Longhorn](#install-longhorn)
+    - [Install KubeVirt](#install-kubevirt)
     - [Next steps: Kubevirt? Nextcloud Helm Chart?](#next-steps-kubevirt-nextcloud-helm-chart)
   - [~~MicroK8s Configuration~~](#microk8s-configuration)
   - [~~Ingress Traffic and Load Balancing~~](#ingress-traffic-and-load-balancing)
@@ -56,9 +57,7 @@ OpnSense router/firewall.
 ### Software
 
 - Ubuntu Server 24.04  
-  (Maybe we should have used [Elemental](https://elemental.docs.rancher.com/)?)
-- ~~MicroK8S Kubernetes~~
-- ~~OpenEBS replicated storage (Mayastor)~~
+  (Maybe I should have used [Elemental](https://elemental.docs.rancher.com/)?)
 - K3s Kubernetes
 - Longhorn Storage Engine
 - Nginx ingress
@@ -222,21 +221,79 @@ export KUBECONFIG=/etc/rancher/k3s/k3s.yaml >> ~/.zshrc
 
 ### Install MetalLB
 
+A load balancer is needed to enable traffic destined to services in the cluster to
+reach their respective "Ingress" resources.  We will use "MetalLB" to avoid the need to
+deploy an external hardware load balancer.  This should work well on small, simple
+networks like home networks or small office environments.
+
+See [20-metallb](/20-metallb/README.md)
+
 ### Install Reflector
+
+We want to minimize the number of TLS certificates required to operate our cluster. We
+will create one wildcard certificate for our cluster, then use "Reflector" (one of many
+K8S resource replicators) to copy our issued certs between K8s namespaces.
+
+See [21-reflector](/21-reflector/README.md)
 
 ### Install Cert-Manager
 
+We will use cert-manager to automate the issuance of TLS certificates within our cluster
+using the ACME protocol as implemented by the "Let's Encrypt" service, in combination
+with DNS01 services provided by CloudFlare.
+
+See [22-cert-manager](/22-cert-manager/README.md)
+
 ### Install Ingress
+
+We will use the NGinx Ingress for Kubernetes to handle routing of external requests to
+services running in K8s.  While it may be possible to get by without an Ingress, using
+one allows us more flexibility in how we secure access to services within K8S.  Services
+such as the Longhorn UI do not natively support TLS *or* authentication.  The Ingress
+allows us to add both layers of security to a resource that otherwise would be "wide
+open" on the LAN.
+
+See [25-nginx-ingress](/25-nginx-ingress/README.md)
 
 ### Install Dashboard
 
+See [30-dashboard](/30-dashboard/README.md)
+
 ### Install Multus
 
+Multus is required to give pods access to alternate network interfaces on out K8S nodes.
+We plan to use Multus to allow storage replication services to run on different
+interfaces than user-facing traffic.  This will help prevent heavy network workloads
+from degrading services running on the LAN.
+
+See [30-multus](/30-multus/README.md)
+
 ### Install Longhorn
+
+We will use longhorn to provide SAN-like services using replicated local storage.
+Longhorn is not the highest-performance replicated storage option, but it is well
+documented for use with K3S, and it is relatively simple to install and configure.
+
+In the near future, Longhorn also will support the use of NVMe-over-TCP, which WILL
+provide SIGNIFICANTLY higher performance, if we feel we need it.
+
+See [40-longhorn](/40-longhorn/README.md)
+
+### Install KubeVirt
+
+I don't know if we actually need this, but KubeVirt allows us to run traditional virtual
+machines within the K8S framework.  This can be very useful when running services that
+are not feasible to run within containers.
+
+See [45-kubevirt](/45-kubevirt/README.md)
 
 ### Next steps: Kubevirt? Nextcloud Helm Chart?
 
 ## ~~MicroK8s Configuration~~
+
+MicroK8S is a problem: Looks convenient, but does not actually work well.  Pretty much
+all of the supported plugin services are poorly maintained and out-of-date.  I think we
+are better off with a more "vanilla" Kubernetes service.
 
 1. Form an HA Cluster:
 
