@@ -8,6 +8,7 @@ obligations, entirely in your "copious" spare time?
 - [The Be-hive: A Self-Hosting Experiment](#the-be-hive-a-self-hosting-experiment)
   - [Environment](#environment)
     - [Hardware](#hardware)
+    - [Budget](#budget)
       - [System Information](#system-information)
     - [Software](#software)
     - [Networking](#networking)
@@ -38,13 +39,28 @@ OpnSense router/firewall.
 
 ### Hardware
 
-- 16 port 1GbE LinkSys Managed Switch
+- 16 port 1GbE TP-Link Managed Switch
 - 3x EQ6 Mini PCs:
   - 2x 1GbE network interfaces
   - 500Gb NVMe Boot Drive
   - 2Tb NVMe Storage Drive
   - AMD Ryzen 5 6600U low-power CPU, 6c/12t
-  
+- OpnSense FW4B Firewall Appliance (repurposed, purchased 2020)
+
+### Budget
+
+| Item                     | Model         | Cost     | Qt  | Total     |
+| ---                      | ---           | ---      | --- | ---       |
+| TP-Link Switch           | TL-SG116E     | $  72    | 1   | $   72    |
+| Beelink Mini-PC          | EQR6          | $ 289    | 3   | $  867    |
+| Crucual 2Tb M.2 SSD      | CT2000P3PSSD8 | $ 118    | 3   | $  354    |
+| 3-ft Cat6 Ethernet Cable | 5-pack (red)  | $  12.50 | 1   | $   12.50 |
+| 3-ft Cat6 Ethernet Cable | 5-pack (blue) | $  12.50 | 1   | $   12.50 |
+| ProtectLi OpnSense FW    | FW4B          | $ 280    | 1   | $  280    |
+| Total                    |               |          |     | $ 1598    |
+
+...But that does not include the cost to my sanity.
+
 #### System Information
 
 | Hostname | S/N | eno1 MAC          | enp5s0 MAC        | wlp3s0 MAC        | 500Gb SSD | 2Tb SSD |
@@ -55,6 +71,8 @@ OpnSense router/firewall.
 |          |     |                   |                   |                   |           |         |
 
 ### Software
+
+Some plans and ideas for what to do with this cluster...
 
 - Ubuntu Server 24.04  
   (Maybe I should have used [Elemental](https://elemental.docs.rancher.com/)?)
