@@ -1,0 +1,22 @@
+# EXPERIMENTAL!
+# This is an attempt to define a StorageClass for KubeVirt VMs.
+# We don't actually want it to be the default StorageClass.  Under OpenShift Virtualization,
+# it is possible to define a default for vms only.  Is that possible with vanilla KubeVirt?
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: longhorn-vm-storage
+  annotations:
+    # storageclass.kubernetes.io/is-default-class: "true"
+    storageclass.kubernetes.io/is-default-virt-class: "true"
+provisioner: driver.longhorn.io
+allowVolumeExpansion: true
+reclaimPolicy: Delete
+parameters:
+  baseImage: ""
+  diskSelector: "ssd,storage"
+  fromBackup: ""
+  migratable: "true"
+  numberOfReplicas: "2"
+  staleReplicaTimeout: "30"
+volumeBindingMode: Immediate

@@ -1,0 +1,14 @@
+{
+  "cniVersion": "1.0.0",
+  "type": "macvlan",
+  "master": "enp5s0",
+  "mode": "bridge",
+  "ipam": {
+    "type": "whereabouts",
+    "range": "192.168.4.0/23",
+    "range_start": "192.168.4.1",
+    "range_end": "192.168.4.255",
+    "node_slice_size": "/26",
+    "configuration_path": "/var/lib/rancher/k3s/agent/etc/cni/net.d/whereabouts.d/whereabouts.conf"
+  }
+}

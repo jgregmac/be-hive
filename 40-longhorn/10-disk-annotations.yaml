@@ -3,9 +3,9 @@ metadata:
     node.longhorn.io/default-disks-config: >
       [ {
       "name":"ssd-nvme",
-      "path":"/var/mnt/longhorn",
+      "path":"/mnt/longhorn-nvme-1",
       "allowScheduling":true,
-      "tags":[ "ssd", "fast" ]
+      "tags":[ "ssd", "storage" ]
       } ]
   labels: 
     node.longhorn.io/create-default-disk: 'config'

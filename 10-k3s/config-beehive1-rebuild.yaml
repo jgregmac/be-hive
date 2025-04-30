@@ -32,3 +32,8 @@ embedded-registry: true
 # k3s at deployment time:
 node-label:
   - node.longhorn.io/create-default-disk=config
+
+# Set device ownership from security context in containerd
+# This WAS and experimental feature in and earlier k3s, but now appears to be removed.
+# We will need to use the config-v3.toml.tmpl file to set this.
+# containerd-device-ownership-from-security-context: true

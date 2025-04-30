@@ -1,15 +1,11 @@
 # The Be-hive: A Self-Hosting Experiment
 
-Let's try using K3S Kuberenetes on NUC-class Micro PCs with a replicated storage engine
-to host cloud-like services entirely at home.  Because why would you NOT want to take on
-the burden of running an entire cloud suite of services ALONG WITH hardware maintenance
-obligations, entirely in your "copious" spare time?
-
 - [The Be-hive: A Self-Hosting Experiment](#the-be-hive-a-self-hosting-experiment)
+  - [Overview](#overview)
   - [Environment](#environment)
     - [Hardware](#hardware)
     - [Budget](#budget)
-      - [System Information](#system-information)
+    - [System Information](#system-information)
     - [Software](#software)
     - [Networking](#networking)
   - [Host Install Process](#host-install-process)
@@ -24,13 +20,29 @@ obligations, entirely in your "copious" spare time?
     - [Install Multus](#install-multus)
     - [Install Longhorn](#install-longhorn)
     - [Install KubeVirt](#install-kubevirt)
-    - [Next steps: Kubevirt? Nextcloud Helm Chart?](#next-steps-kubevirt-nextcloud-helm-chart)
+    - [Next steps: Nextcloud Helm Chart?](#next-steps-nextcloud-helm-chart)
   - [~~MicroK8s Configuration~~](#microk8s-configuration)
   - [~~Ingress Traffic and Load Balancing~~](#ingress-traffic-and-load-balancing)
   - [Troubleshooting](#troubleshooting)
     - [Name resolution problems](#name-resolution-problems)
     - [Reconfiguring K3s after installation](#reconfiguring-k3s-after-installation)
   - [Resources](#resources)
+
+## Overview
+
+Let's try using K3S Kuberenetes on NUC-class Micro PCs with a replicated storage engine
+to host cloud-like services entirely at home.  Because why would you NOT want to take on
+the burden of running an entire cloud suite of services ALONG WITH hardware maintenance
+obligations, entirely in your "copious" spare time?
+
+The configuration steps documented here are the current choices resulting from a fair
+amount of trial and error.  This project stated with an effort to deploy a MicroK8s
+cluster on Ubuntu Core OS and Mayastor, for the purpose of self-hosting a replacement
+"OneDrive.  It has morphed to this current K3s/Longhorn project.  It may change again in
+the future as I discover more stable or maintainable platform options.
+
+I don't know that this ever will have been a good idea, but it did give opportunities
+to learn.
 
 ## Environment
 
@@ -61,7 +73,10 @@ OpnSense router/firewall.
 
 ...But that does not include the cost to my sanity.
 
-#### System Information
+### System Information
+
+Keep a table of your hardware identifiers:  
+It is useful when building out your infrastructure-as-code.
 
 | Hostname | S/N | eno1 MAC          | enp5s0 MAC        | wlp3s0 MAC        | 500Gb SSD | 2Tb SSD |
 | -------- | --- | ----------------- | ----------------- | ----------------- | --------- | ------- |
@@ -206,8 +221,7 @@ Some plans and ideas for what to do with this cluster...
 sudo rm /etc/rancher/node/password
 # From a working node:
 kubectl delete node beehive[#]
-# Longhorn cleanup procedure before reinstalling node?
-sudo  umount /var/mnt/longhorn
+
 # (Then see 40-longhorn/README.md for instructions on preparing the node for Longhorn.)
 
 # Prepare the k3s install directory:
@@ -252,6 +266,9 @@ We want to minimize the number of TLS certificates required to operate our clust
 will create one wildcard certificate for our cluster, then use "Reflector" (one of many
 K8S resource replicators) to copy our issued certs between K8s namespaces.
 
+Reflector is a prerequisite for cert-manager.  We will use it to replicate certificates
+provisioned by cert-manager between Kubernetes namespaces.
+
 See [21-reflector](/21-reflector/README.md)
 
 ### Install Cert-Manager
@@ -259,6 +276,9 @@ See [21-reflector](/21-reflector/README.md)
 We will use cert-manager to automate the issuance of TLS certificates within our cluster
 using the ACME protocol as implemented by the "Let's Encrypt" service, in combination
 with DNS01 services provided by CloudFlare.
+
+Cert-Manager is a prerequisite for Ingress installation, as the NGinx Ingress will
+use cert-manager-provisioned certificates for connection security.
 
 See [22-cert-manager](/22-cert-manager/README.md)
 
@@ -280,9 +300,10 @@ See [30-dashboard](/30-dashboard/README.md)
 ### Install Multus
 
 Multus is required to give pods access to alternate network interfaces on out K8S nodes.
-We plan to use Multus to allow storage replication services to run on different
-interfaces than user-facing traffic.  This will help prevent heavy network workloads
-from degrading services running on the LAN.
+
+Multus is a prerequisite for Longhorn because we plan to use Multus to allow storage
+replication services to run on a different interface from user-facing traffic.  This
+will help prevent heavy network workloads from degrading services running on the LAN.
 
 See [30-multus](/30-multus/README.md)
 
@@ -295,6 +316,9 @@ documented for use with K3S, and it is relatively simple to install and configur
 In the near future, Longhorn also will support the use of NVMe-over-TCP, which WILL
 provide SIGNIFICANTLY higher performance, if we feel we need it.
 
+Longhorn is a prerequisite for any workloads that we will run that require persistent
+storage.
+
 See [40-longhorn](/40-longhorn/README.md)
 
 ### Install KubeVirt
@@ -303,9 +327,12 @@ I don't know if we actually need this, but KubeVirt allows us to run traditional
 machines within the K8S framework.  This can be very useful when running services that
 are not feasible to run within containers.
 
+Support for live migration of VMs when using Longhorn is doubtful, but I don't know that
+we particularly care.
+
 See [45-kubevirt](/45-kubevirt/README.md)
 
-### Next steps: Kubevirt? Nextcloud Helm Chart?
+### Next steps: Nextcloud Helm Chart?
 
 ## ~~MicroK8s Configuration~~
 

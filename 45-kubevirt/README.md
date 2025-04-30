@@ -1,5 +1,59 @@
 # KubeVirt on K3s
 
+## Prerequisites
+
+Use of Kubevirt with Longhorn has some quirks.
+
+It appears we need to add a configuration option to the containerd runtime in K3s, as
+per:  
+<https://github.com/kubevirt/containerized-data-importer/blob/main/doc/block_cri_ownership_config.md>  
+and:  
+<https://github.com/kubevirt/containerized-data-importer/blob/main/doc/datavolumes.md#block-volume-mode>
+
+(Note that K3s uses containerd 2, with the "v3" configuraiton syntax)
+
+We should be able to affect this change by setting the containerd config options:
+
+```toml
+[plugins.'io.containerd.grpc.v1.cri']
+    device_ownership_from_security_context = true
+```
+
+K3s only offers the following on how to do this:  
+<https://docs.k3s.io/advanced?_highlight=containerd#configuring-containerd>
+
+The problem there is that the setting we want already is in the template, and the
+documentation is for NEW settings, not ones we wish to override.  Claude AI suggested
+that we try this nonsense to override default settings in the `ContainerdConfig` struct,
+but doing so does not work.  We get an error that "merge" is not a supported function:
+
+```text
+#/var/lib/rancher/k3s/agent/etc/containerd/config-v3.toml.tmpl
+
+{{- $nonrootDevices := true -}}
+{{- $updatedDot := merge . (dict "NonrootDevices" $nonrootDevices) -}}
+{{ template "base" $updatedDot }}
+```
+
+A different AI give us this nonsense:
+
+Create a configuration file in the containerd config directory:
+
+sudo mkdir -p /var/lib/rancher/k3s/agent/etc/containerd/config.toml.d/
+
+Create a file with your specific configuration setting:
+
+cat << EOF | sudo tee /var/lib/rancher/k3s/agent/etc/containerd/config.toml.d/kubevirt.toml
+[plugins."io.containerd.grpc.v1.cri"]
+  device_ownership_from_security_context = true
+EOF
+
+Restart K3s to apply the changes:
+
+sudo systemctl restart k3s
+
+This AI then has the nerve to say that this is documented. What bullshit.
+
 ## Install
 
 Validate the host is ready for virtualization:

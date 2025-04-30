@@ -1,21 +1,21 @@
-# Default values for longhorn.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
-csi:
-  kubeletRootDir: /var/snap/microk8s/common/var/lib/kubelet
+# This file is used to set custom values for the Longhorn installation.
+
+# Annotations to add to the Longhorn Manager DaemonSet Pods. Optional.
+annotations: {}
+
+# If your K8s cluster uses a non-standard kubelet path, you can set it here.
+# I /believe/ that the /var/lib/kubelet path used by k3s is "standard". Let's find out.
+# csi:
+#  kubeletRootDir: /var/lib/kubelet
+  # In a MicroK8s deployment, you would need to specify the kubelet path manually.
+  # kubeletRootDir: /var/snap/microk8s/common/var/lib/kubelet
 
 defaultSettings:
   createDefaultDiskLabeledNodes: true
-  defaultDataPath: ~
-  defaultDataLocality: ~
-  replicaSoftAntiAffinity: ~
-  replicaAutoBalance: ~
-  storageOverProvisioningPercentage: ~
-  storageMinimalAvailablePercentage: ~
-  upgradeChecker: ~
+  # Use defaultDataPath if not setting node annotations for Longhorn configuration:
+  # defaultDataPath: /mnt/longhorn-nvme-1
   defaultReplicaCount: 2
-  defaultLonghornStaticStorageClass: ~
-  priorityClass: ~
+  # priorityClass: ~
   storageNetwork: kube-system/storage-net
 
 longhornUI:
@@ -74,5 +74,8 @@ ingress:
     # message to display with an appropriate context why the authentication is required
     nginx.org/basic-auth-realm: 'Authentication Required '
 
-# Annotations to add to the Longhorn Manager DaemonSet Pods. Optional.
-annotations: {}
+persistence:
+  defaultNodeSelector:
+    enable: true
+    selector: "ssd,storage"
+
