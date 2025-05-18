@@ -18,6 +18,7 @@ spec:
   rules:
   - host: "dashboard.be-hive.cloud"
   - host: "longhorn.be-hive.cloud"
+  - host: "nextcloud.be-hive.cloud"
   tls:
   - hosts:
     - "be-hive.cloud"

@@ -5,7 +5,7 @@ metadata:
 spec:
   accessModes:
     - ReadWriteOnce
-  storageClassName: longhorn-ssd-double
+  storageClassName: longhorn-ssd-double``
   resources:
     requests:
       storage: 2Gi

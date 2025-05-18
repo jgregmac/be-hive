@@ -1,0 +1,26 @@
+# For reference... an extract of the relevant settings created by the Helm chart deployment:
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    ingress.kubernetes.io/ssl-redirect: 'true'
+  name: behive-nextcloud
+  namespace: nextcloud
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: nextcloud.be-hive.cloud
+    http:
+      paths:
+      - backend:
+          service:
+            name: behive-nextcloud
+            port:
+              number: 8080
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - "nextcloud.be-hive.cloud"
+    secretName: be-hive-cloud-tls
