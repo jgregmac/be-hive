@@ -20,7 +20,7 @@
     - [Install Multus](#install-multus)
     - [Install Longhorn](#install-longhorn)
     - [Install KubeVirt](#install-kubevirt)
-    - [Next steps: Nextcloud Helm Chart?](#next-steps-nextcloud-helm-chart)
+    - [Install Nextcloud](#install-nextcloud)
   - [~~MicroK8s Configuration~~](#microk8s-configuration)
   - [~~Ingress Traffic and Load Balancing~~](#ingress-traffic-and-load-balancing)
   - [Troubleshooting](#troubleshooting)
@@ -332,7 +332,12 @@ we particularly care.
 
 See [45-kubevirt](/45-kubevirt/README.md)
 
-### Next steps: Nextcloud Helm Chart?
+### Install Nextcloud
+
+Nextcloud is the "killer app" for this whole experiment: A self-hosted private cloud
+service for the storage and management of documents.
+
+See [50-nextcloud](/50-Nextcloud/README.md)
 
 ## ~~MicroK8s Configuration~~
 
